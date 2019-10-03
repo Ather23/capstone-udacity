@@ -39,48 +39,17 @@ CREATE TABLE IF NOT EXISTS "public"."dim_collision_table"
  CONSTRAINT "PK_dim_collision_table" PRIMARY KEY ( "unique_id" )
 );
 """
-create_dim_station_table = """
-CREATE TABLE IF NOT EXISTS "public"."dim_station_table"
-(
- "station_id"   integer NOT NULL,
- "station_name" varchar(max) NOT NULL,
- "longitude"    decimal(10,7) NOT NULL,
- "latitude"     decimal(10,7) NOT NULL,
- CONSTRAINT "PK_dim_station_table" PRIMARY KEY ( "station_id" )
-);
-"""
-create_dim_bike_trips_table = """
-CREATE TABLE IF NOT EXISTS "public"."dim_bike_trips_table"
-(
- "trip_id"          VARCHAR(MAX) NOT NULL,
- "trip_duration"    integer,
- "bike_id"          integer,
- "birth_year"       integer,
- "gender"           integer,
- "start_time"       timestamp NOT NULL,
- "end_time"         timestamp NOT NULL,
- "trip_vicinity_id" varchar(max) NOT NULL,
- CONSTRAINT "PK_dim_bike_trips_table" PRIMARY KEY ( "trip_id", "trip_vicinity_id" ),
- CONSTRAINT "FK_265" FOREIGN KEY ( "trip_vicinity_id" ) REFERENCES "public"."fact_bike_accident_table" ( "trip_vicinity_id" )
-);
-"""
 create_fact_bike_accident_table = """
-CREATE TABLE IF NOT EXISTS "public"."fact_bike_accident_table"
+CREATE TABLE "public"."fact_bike_accident_table"
 (
- "trip_id"          VARCHAR(MAX) IDENTITY ( 1, 1 ),
- "trip_vicinity_id" varchar(max) NOT NULL,
+ "trip_id"          integer IDENTITY ( 1, 1 ),
  "unique_id"        integer,
  "start_station_id" integer NOT NULL,
  "zip_code"         varchar(256) NOT NULL,
  "end_station_id"   integer NOT NULL,
- CONSTRAINT "PK_fact_bike_accident_table" PRIMARY KEY ( "trip_vicinity_id" ),
- CONSTRAINT "FK_259" FOREIGN KEY ( "unique_id" ) REFERENCES "public"."dim_collision_table" ( "unique_id" ),
- CONSTRAINT "FK_262" FOREIGN KEY ( "start_station_id" ) REFERENCES "public"."dim_station_table" ( "station_id" ),
- CONSTRAINT "FK_290" FOREIGN KEY ( "zip_code" ) REFERENCES "public"."dim_zip_code_table" ( "zip_code" ),
- CONSTRAINT "FK_298" FOREIGN KEY ( "end_station_id" ) REFERENCES "public"."dim_station_table" ( "station_id" )
+ CONSTRAINT "PK_fact_bike_accident_table" PRIMARY KEY ( "trip_id" )
 );
 """
-
 create_collision_staging = """
 CREATE TABLE IF NOT EXISTS collision_staging(
     date VARCHAR(100),
@@ -187,77 +156,3 @@ WHERE
     zip_code IS NOT NULL and
     zip_code <> TRIM('');
 """
-insert_start_station_table = """
-INSERT INTO dim_station_table (
-    station_id,
-    station_name,
-    longitude,
-    latitude
-    )
-SELECT 
-    distinct start_station_id,
-    start_station_name,
-    start_station_longitude,
-    start_station_latitude
-FROM 
-    bike_share_staging
-WHERE 
-    start_station_longitude IS NOT NULL and 
-    start_station_id IS NOT NULL;
-"""
-insert_end_station_table = """
-INSERT INTO dim_station_table (
-    station_id,
-    station_name,
-    longitude,
-    latitude
-    )
-SELECT 
-    distinct start_station_id,
-    end_station_name,
-    end_station_longitude,
-    end_station_latitude
-FROM 
-    bike_share_staging
-WHERE 
-    end_station_longitude IS NOT NULL and 
-    end_station_id IS NOT NULL;
-"""
-
-
-### INSERT TABLE
-#
-# insert_collision_table = """
-# INSERT INTO dim_collision_loc_table (
-#     unique_id,
-#     timestamp,
-#     zip_code
-# )
-# SELECT
-#     distinct unique_id,
-#     {},
-#     zip_code
-# FROM
-#     collision_staging as cs
-# WHERE
-#     zip_code IS NOT NULL and
-#     zip_code <> TRIM('');
-# """.format("TO_TIMESTAMP(cs.date+' '+cs.time,'MM/DD/YYYY HH:MI')")
-
-
-
-# insert_street_table = """
-# INSERT INTO dim_street_table(
-#   unique_id,
-#   on_street_name,
-#   cross_street_name,
-#   off_street_name
-# )
-# SELECT
-# 	distinct unique_id,
-#     on_street_name,
-#     cross_street_name,
-#     off_street_name
-# FROM
-# 	collision_staging;
-# """

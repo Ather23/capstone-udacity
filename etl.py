@@ -14,6 +14,7 @@ def create_tables():
     try:
         dwh.create_collision_tables()
         dwh.create_bike_share_tables()
+        dwh.create_fact_tables()
     except Exception as e:
         assert False
 
@@ -63,7 +64,7 @@ def create_fact_dim_tables():
 
 
 if __name__ == "__main__":
-
+    #drop()
     #create_tables()
-    stage_from_s3_to_redshift()
+    #stage_from_s3_to_redshift()
     create_fact_dim_tables()
