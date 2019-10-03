@@ -40,14 +40,16 @@ CREATE TABLE IF NOT EXISTS "public"."dim_collision_table"
 );
 """
 create_fact_bike_accident_table = """
-CREATE TABLE "public"."fact_bike_accident_table"
+CREATE TABLE "public"."trip_incident_table"
 (
+ "trip_incident_id" varchar(max),
  "trip_id"          integer IDENTITY ( 1, 1 ),
  "unique_id"        integer,
  "start_station_id" integer NOT NULL,
- "zip_code"         varchar(256) NOT NULL,
+ "start_zip_code"         varchar(256) NOT NULL,
  "end_station_id"   integer NOT NULL,
- CONSTRAINT "PK_fact_bike_accident_table" PRIMARY KEY ( "trip_id" )
+ "end_zip_code"         varchar(256) NOT NULL
+ CONSTRAINT "PK_fact_bike_accident_table" PRIMARY KEY ( "trip_incident_id" )
 );
 """
 create_collision_staging = """
