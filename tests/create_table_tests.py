@@ -24,6 +24,48 @@ class TestTableCreation(unittest.TestCase):
         except Exception as e:
             assert False
 
+    def test_fetch_data(self):
+        dwh = TableOperations()
+        try:
+            obj = dwh.fetch_data("""
+                SELECT *
+                FROM bike_share_staging
+                LIMIT 5;
+            """)
+            print(obj)
+        except Exception as e:
+            assert False
+
+    def test_bike_strips_query(self):
+        bike_trips_query = """
+            SELECT 
+                md5(bikeid || starttime) as bike_trip_id,
+                start_station_id,
+                end_station_id,
+                start_station_latitude,
+                start_station_longitude,
+                end_station_latitude,
+                end_station_longitude     
+            FROM 
+            public.bike_share_staging
+
+            WHERE
+                start_station_latitude IS NOT NULL AND
+                start_station_longitude IS NOT NULL
+            limit 100;    
+        """
+        dwh = TableOperations()
+        try:
+            obj = dwh.fetch_data(bike_trips_query)
+            print(obj)
+        except Exception as e:
+            assert False
+
+    def test_hashfunction(self):
+        tbop = TableOperations()
+        obj = tbop.md5_hash(14548,"2013-07-01 00:00:00")
+        print(obj)
+
 
 if __name__ == "__main__":
     unittest.main()

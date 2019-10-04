@@ -1,7 +1,9 @@
 from app_config import AppConfig
+from constants import Tables
 from query_dwh_tables import TableOperations
 from s3_explorer import S3Helper
 from stage_data import StageS3toRedShift
+import logging
 
 
 def create_tables():
@@ -49,6 +51,23 @@ def stage_from_s3_to_redshift():
         app.s3_bucket, collision_data
     ).execute()
 
+    validate_tables([
+        Tables.COLLISION_SHARING_TABLE_NAME,
+        Tables.BIKE_SHARING_TABLE_NAME
+    ])
+
+
+def validate_tables(tbl_list):
+    """
+    Validates if tables have data
+    :param tbl_list: list of table names
+    :return: None
+    """
+    dwh = TableOperations()
+    for tbl in tbl_list:
+        count = dwh.row_count_table(tbl)
+        if count < 1:
+            raise Exception("{} has no rows".format(tbl))
 
 def create_fact_dim_tables():
     """
@@ -60,11 +79,18 @@ def create_fact_dim_tables():
     try:
         dwh.insert_fact_and_dim_tables()
     except Exception as e:
-        assert False
+        logging.critical(e)
+
+    validate_tables([
+        Tables.DIM_BIKE_TRIPS,
+        Tables.DIM_STATION_TABLE,
+        Tables.DIM_ZIP_CODE_TABLE,
+        Tables.DIM_COLLISION_TABLE,
+        Tables.FACT_TABLE_NAME
+    ])
 
 
 if __name__ == "__main__":
-    #drop()
-    #create_tables()
-    #stage_from_s3_to_redshift()
+    # drop()
+    # stage_from_s3_to_redshift()
     create_fact_dim_tables()

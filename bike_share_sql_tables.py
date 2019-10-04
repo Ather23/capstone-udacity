@@ -3,16 +3,15 @@ SQL statements for bike share data
 """
 
 create_dim_bike_trips_table = """
-CREATE TABLE "public"."dim_bike_trips_table"
+CREATE TABLE IF NOT EXISTS "public"."dim_bike_trips_table"
 (
- "trip_id"       varchar(max) NOT NULL,
  "trip_duration" integer,
- "bike_id"       integer,
+ "bike_id"       integer NOT NULL,
  "birth_year"    integer,
  "gender"        integer,
  "start_time"    timestamp NOT NULL,
  "end_time"      timestamp NOT NULL,
- CONSTRAINT "PK_dim_bike_trips_table" PRIMARY KEY ( "trip_id" )
+ CONSTRAINT "PK_dim_bike_trips_table" PRIMARY KEY ( "bike_id","start_time" )
  );
 """
 create_dim_station_table = """
@@ -52,22 +51,24 @@ INSERT statements
 """
 insert_dim_bike_trips_table = """
 INSERT INTO dim_bike_trips_table (
-    trip_id,
-    trip_duration,
-    start_time,
-    end_time,
     bike_id,
-    gender
+    start_time,
+    trip_duration,
+    end_time,
+    gender,
+    birth_year
 )
 SELECT 
-    md5(starttime || bikeid) tripid,
-    tripduration,
-    starttime,
-    stoptime,
     bikeid,
-    gender
+    starttime,
+    tripduration,
+    stoptime,
+    gender,
+    birthyear
 FROM bike_share_staging
 WHERE 
+    bikeid IS NOT NULL and
+    starttime IS NOT NULL and
     start_station_longitude IS NOT NULL and 
     start_station_id IS NOT NULL and
     end_station_latitude IS NOT NULL and

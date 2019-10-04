@@ -26,3 +26,9 @@ class HarverSine:
         d = self.hav(lat2 - lat1) + math.cos(lat1) * math.cos(lat2) * self.hav(lg2 - lg1)
         d = 2 * r * math.sqrt(math.asin(d))
         return d
+
+    def is_within_radius(self, longlat1: tuple, longlat2: tuple):
+        d = self.haversine_distance(longlat1, longlat2)
+        if d < 0.05:
+            return True
+        return False
