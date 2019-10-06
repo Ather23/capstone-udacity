@@ -9,12 +9,9 @@ CREATE TABLE IF NOT EXISTS "public"."fact_trip_incident_table"
  "biked_id"         integer IDENTITY ( 1, 1 ),
  "unique_id"        integer,
  "end_station_id"   integer NOT NULL,
- "zip_code"         varchar(max) NOT NULL,
+ "zip_code"         varchar(max),
  CONSTRAINT "PK_fact_bike_accident_table" PRIMARY KEY ( "start_station_id", "biked_id" )
 );
-
-
-
 """
 create_dim_station_table = """
 CREATE TABLE IF NOT EXISTS "public"."dim_station_table"

@@ -3,7 +3,11 @@ from query_dwh_tables import TableOperations
 from red_shift_connection import RedShiftConnection
 
 
-class ProximityCalculation:
+class FactTableBuilder:
+    """
+    Class
+
+    """
     zip_codes_query = """
         SELECT distinct
             zip_code,
@@ -49,16 +53,17 @@ class ProximityCalculation:
             bike_id,
             unique_id,
             start_station_id,
-            end_station_id        
+            end_station_id,
+            zip_code        
         ) VALUES(
-            {},{},{},{}
+            {},{},{},{},{}
         )                
     """
 
     rds = RedShiftConnection()
 
     def __int__(self, rds_connection):
-        super(ProximityCalculation, self).__init__()
+        super(FactTableBuilder, self).__init__()
 
     def fetch_zip_codes(self):
         """
@@ -145,21 +150,11 @@ class ProximityCalculation:
                                     trip[0],
                                     id[0],
                                     trip[2],
-                                    trip[3]
+                                    trip[3],
+                                    zipcode
                                 )
                             )
 
     def generate_hash(self, bike_id, starttime, start_station_id):
         string = str(bike_id) + starttime + str(start_station_id)
         return hash(string)
-
-
-class TripIncidentFactTbl:
-    trip_incident_id = ""
-    unique_id = 0
-    start_station_id = 0
-    end_station_id = 0
-    zip_code = ""
-
-    def __init__(self):
-        super(TripIncidentFactTbl, self).__init__()

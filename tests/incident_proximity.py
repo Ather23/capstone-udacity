@@ -1,4 +1,4 @@
-from StationProximityCalculation import ProximityCalculation
+from fact_table_builder import ProximityCalculation
 import unittest
 
 
