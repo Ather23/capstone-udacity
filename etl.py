@@ -91,6 +91,6 @@ def create_fact_dim_tables():
 
 
 if __name__ == "__main__":
-    # drop()
-    # stage_from_s3_to_redshift()
+    drop()
+    stage_from_s3_to_redshift()
     create_fact_dim_tables()

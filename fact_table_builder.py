@@ -5,7 +5,8 @@ from red_shift_connection import RedShiftConnection
 
 class FactTableBuilder:
     """
-    Class
+    Builder class that performs
+    operations to build the fact table
 
     """
     zip_codes_query = """
