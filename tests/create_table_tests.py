@@ -1,6 +1,9 @@
 from query_dwh_tables import TableOperations
 import unittest
 
+from red_shift_connection import RedShiftConnection
+
+
 class TestTableCreation(unittest.TestCase):
     def test_create_bike_share_tables_should_not_throw_exception(self):
         dwh = TableOperations()
@@ -61,9 +64,25 @@ class TestTableCreation(unittest.TestCase):
         except Exception as e:
             assert False
 
+    def test_insert_into_fact_tble(self):
+        fact_insert = f"""
+               INSERT INTO fact_trip_incident_table(
+                   incident_id,
+                   bike_id,
+                   unique_id,
+                   start_station_id,
+                   end_station_id        
+               ) VALUES (
+                   {123},{123},{1},{2}
+               )                
+           """;
+
+        tbl = TableOperations()
+        tbl.execute_qry(fact_insert)
+
     def test_hashfunction(self):
         tbop = TableOperations()
-        obj = tbop.md5_hash(14548,"2013-07-01 00:00:00")
+        obj = tbop.md5_hash(14548, "2013-07-01 00:00:00")
         print(obj)
 
 

@@ -38,7 +38,21 @@ class ProximityCalculation:
     uniqueid_query = """
         SELECT unique_id
         FROM collision_staging
-        WHERE zip_code like '{}';    
+        WHERE 
+            zip_code like '{}' AND
+            zip_code <> TRIM('') AND
+            number_of_cyclists_killed > 0 AND
+            number_of_cyclists_injured >0;    
+    """
+    fact_insert = """
+        INSERT INTO fact_trip_incident_table(
+            bike_id,
+            unique_id,
+            start_station_id,
+            end_station_id        
+        ) VALUES(
+            {},{},{},{}
+        )                
     """
 
     rds = RedShiftConnection()
@@ -74,12 +88,32 @@ class ProximityCalculation:
         )
         """
         tblop = TableOperations()
-        data = tblop.fetch_data(self.bike_trips_query)
+        # data = tblop.fetch_data(self.bike_trips_query)
+        data = tblop.fetch_data("""
+          SELECT 
+            bikeid,
+            starttime,
+            start_station_id,
+            end_station_id,
+            start_station_latitude,
+            start_station_longitude,
+            end_station_latitude,
+            end_station_longitude     
+        FROM 
+        public.bike_share_staging
+        
+        WHERE
+            bikeid = 20621
+            start_station_latitude IS NOT NULL AND
+            start_station_longitude IS NOT NULL
+        limit 100;    
+        
+        """)
         return data
 
     def get_unique_id_from_zipcode(self, zip_code):
         tblop = TableOperations()
-        data = tblop.fetch_data(self.zip_codes_query.format(zip_code))
+        data = tblop.fetch_data(self.uniqueid_query.format(zip_code))
         return data
 
     def fact_table_data(self):
@@ -88,27 +122,32 @@ class ProximityCalculation:
         :return: List of trip incidents
         """
 
-        incidents_list = []
         for trip in self.fetch_bike_trips_from_staging():
-            print("Trip: " + trip[0])
-            longlat = (trip[3], trip[4])
+            longlat = (trip[4], trip[5])
             for colzip in self.fetch_zip_codes():
                 z_xy = (colzip[1], colzip[2])
                 zipcode = colzip[0]
                 if HarverSine().is_within_radius(longlat, z_xy):
-                    inc = TripIncidentFactTbl()
-                    inc.trip_incident_id = self.generate_hash(
-                        trip[0],
-                        trip[1].strftime('%Y-%m-%d %H:%M:%S'),
-                        trip[2]
-                    )
-                    inc.start_station_id = trip[3]
-                    inc.end_station_id = trip[7]
-                    inc.zip_code = zipcode
                     uniqueids = self.get_unique_id_from_zipcode(zipcode)
-                    for id in uniqueids:
-                        inc.unique_id = id[0]
-                        incidents_list.append(inc)
+                    if len(uniqueids)<1:
+                        self.rds.execute_sql(
+                            self.fact_insert.format(
+                                trip[0],
+                                0,
+                                trip[2],
+                                trip[3]
+                            )
+                        )
+                    else:
+                        for id in uniqueids:
+                            self.rds.execute_sql(
+                                self.fact_insert.format(
+                                    trip[0],
+                                    id[0],
+                                    trip[2],
+                                    trip[3]
+                                )
+                            )
 
     def generate_hash(self, bike_id, starttime, start_station_id):
         string = str(bike_id) + starttime + str(start_station_id)

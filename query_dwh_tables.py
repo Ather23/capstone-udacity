@@ -22,6 +22,9 @@ class TableOperations:
                 logging.critical("Query: {} | Error: {}".format(qry, e))
                 raise Exception("Unable to execute query:{}".format(qry))
 
+    def execute_qry(self, qry):
+        self.rds.execute_sql(qry)
+
     def drop_all_tables(self):
         qrys = [
             "drop table IF EXISTS dim_station_table;",
@@ -67,13 +70,13 @@ class TableOperations:
         ]
         self.__exec_sql_qry(tbls_to_insert)
 
-    def md5_hash(self,bike_id,starttime):
+    def md5_hash(self, bike_id, starttime):
         cur = self.rds.con.cursor()
-        qry="""
+        qry = """
             SELECT md5('{}' || {}) tripid;
-            """.format(starttime,bike_id).strip()
+            """.format(starttime, bike_id).strip()
         cur.execute(qry)
-        rows =cur.fetchone()
+        rows = cur.fetchone()
         return rows[0]
 
     def fetch_data(self, qry):
@@ -89,3 +92,4 @@ class TableOperations:
         cur.execute(qry)
         row = cur.fetchone()
         return row[0]
+

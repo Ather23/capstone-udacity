@@ -29,6 +29,6 @@ class HarverSine:
 
     def is_within_radius(self, longlat1: tuple, longlat2: tuple):
         d = self.haversine_distance(longlat1, longlat2)
-        if d < 0.05:
+        if d < 0.01:
             return True
         return False

@@ -3,16 +3,18 @@ SQL statements for bike share data
 """
 
 create_dim_bike_trips_table = """
-CREATE TABLE IF NOT EXISTS "public"."dim_bike_trips_table"
+CREATE TABLE IF NOT EXISTS "public"."fact_trip_incident_table"
 (
- "trip_duration" integer,
- "bike_id"       integer NOT NULL,
- "birth_year"    integer,
- "gender"        integer,
- "start_time"    timestamp NOT NULL,
- "end_time"      timestamp NOT NULL,
- CONSTRAINT "PK_dim_bike_trips_table" PRIMARY KEY ( "bike_id","start_time" )
- );
+ "start_station_id" integer NOT NULL,
+ "biked_id"         integer IDENTITY ( 1, 1 ),
+ "unique_id"        integer,
+ "end_station_id"   integer NOT NULL,
+ "zip_code"         varchar(max) NOT NULL,
+ CONSTRAINT "PK_fact_bike_accident_table" PRIMARY KEY ( "start_station_id", "biked_id" )
+);
+
+
+
 """
 create_dim_station_table = """
 CREATE TABLE IF NOT EXISTS "public"."dim_station_table"
